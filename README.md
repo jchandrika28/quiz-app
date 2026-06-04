@@ -28,7 +28,7 @@ A simple browser-based quiz app built with plain HTML, CSS, and JavaScript.
 
 ## Notes
 
-- Questions are loaded from `https://opentdb.com/api.php`.
+- Questions are loaded from `https://opentdb.com/api_config.php`.
 - The quiz uses 5 questions per session.
 - The leaderboard shows the top 5 scores stored in your browser.
 
