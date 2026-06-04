@@ -1,0 +1,56 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProQuiz</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="app">
+        <section id="welcome-screen" class="view">
+            <h1><b>ProQuiz Master</b></h1>
+            <div class="form-group">
+                <label>Player Name</label>
+                <input type="text" id="username" placeholder="Enter Name...">
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                
+                <select id="category-select">
+                
+                    <option value="9">General Knowledge</option>
+                    <option value="18">Computer Science</option>
+                    <option value="21">Sports</option>
+                    <option value="23">History</option>
+                </select>
+            </div>
+            <button id="start-btn" class="main-btn">Start Quiz</button>
+        </section>
+
+        <section id="quiz-screen" class="view hide">
+            <div class="quiz-header">
+                <div id="user-badge">👤 Player</div>
+                <div id="timer-display">Time: <span id="seconds">15</span>s</div>
+            </div>
+            <div class="progress-bar-wrap">
+                <div id="progress-fill"></div>
+            </div>
+            <h2 id="question-text">Fetching questions...</h2>
+            <div id="answer-grid"></div>
+        </section>
+
+        <section id="results-screen" class="view hide">
+            <h2>Quiz Results</h2>
+            <p id="final-stat"></p>
+            <div id="leaderboard">
+                <h3>Top Scores</h3>
+                <ul id="score-list"></ul>
+            </div>
+            <button onclick="location.reload()" class="main-btn">Play Again</button>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
