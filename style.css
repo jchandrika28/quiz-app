@@ -88,14 +88,17 @@ input, select {
 .warning {
     color: red;
 }
+
 #score-list {
-     list-style: none; 
-     padding: 0; 
-    }
+    list-style: none;
+    padding: 0;
+}
+
 #score-list li {
-     background: grey;
-     padding: 0.5rem;
-     margin-top: 0.5rem;
-     border-radius: 4px;
-     display: flex;
-     justify-content: space-between; }
+    background: grey;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+}
