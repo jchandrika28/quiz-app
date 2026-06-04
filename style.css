@@ -1,0 +1,101 @@
+/* Basic colors */
+body {
+    background: #0d609f;
+    color: white;
+    font-family: Arial, sans-serif;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* Main box */
+.view {
+    background: #15183c;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+}
+
+/* Hide element */
+.hide {
+    display: none;
+}
+
+/* Header (score + timer) */
+.quiz-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+/* Progress bar */
+.progress-bar-wrap {
+    background: gray;
+    height: 8px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+#progress-fill {
+    background: blue;
+    height: 100%;
+    width: 0%;
+}
+
+/* Input fields */
+input, select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+}
+
+/* Main button */
+.main-btn {
+    width: 100%;
+    padding: 10px;
+    background: blue;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+/* Answer buttons */
+.ans-btn {
+    width: 100%;
+    padding: 10px;
+    background: gray;
+    color: white;
+    border: none;
+    margin-top: 5px;
+    cursor: pointer;
+}
+
+/* Correct & wrong */
+.correct {
+    background: green;
+}
+
+.wrong {
+    background: red;
+}
+
+/* Warning (timer) */
+.warning {
+    color: red;
+}
+#score-list {
+     list-style: none; 
+     padding: 0; 
+    }
+#score-list li {
+     background: grey;
+     padding: 0.5rem;
+     margin-top: 0.5rem;
+     border-radius: 4px;
+     display: flex;
+     justify-content: space-between; }
