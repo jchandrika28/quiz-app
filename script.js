@@ -7,98 +7,141 @@ class Quiz {
         this.timer = null;
         this.timeLeft = 15;
 
-        // UI Bindings
-        this.views = document.querySelectorAll('.view');
-        this.startBtn = document.getElementById('start-btn');
-        this.answerGrid = document.getElementById('answer-grid');
-        this.timerEl = document.getElementById('seconds');
-        
-        this.startBtn.addEventListener('click', () => this.initGame());
+        // UI Elements
+        this.views = document.querySelectorAll(".view");
+        this.startBtn = document.getElementById("start-btn");
+        this.answerGrid = document.getElementById("answer-grid");
+        this.timerEl = document.getElementById("seconds");
+
+        this.startBtn.addEventListener("click", () => this.initGame());
     }
 
     showView(viewId) {
-        this.views.forEach(v => v.classList.add('hide'));
-        document.getElementById(viewId).classList.remove('hide');
+        this.views.forEach(view => view.classList.add("hide"));
+        document.getElementById(viewId).classList.remove("hide");
     }
 
     async initGame() {
-        this.userName = document.getElementById('username').value || "Player";
-        const cat = document.getElementById('category-select').value;
-        document.getElementById('user-badge').innerText = `👤 ${this.userName}`;
-        
+        this.userName =
+            document.getElementById("username").value.trim() || "Player";
+
+        const category =
+            document.getElementById("category-select").value;
+
+        document.getElementById(
+            "user-badge"
+        ).innerText = `👤 ${this.userName}`;
+
         try {
-            const res = await fetch(`https://opentdb.com/api.php?amount=5&category=${cat}&type=multiple`);
-            const data = await res.json();
+            const response = await fetch(
+                `https://opentdb.com/api.php?amount=5&category=${category}&type=multiple`
+            );
+
+            const data = await response.json();
+
+            if (!data.results || data.results.length === 0) {
+                alert("No questions available.");
+                return;
+            }
+
             this.questions = data.results.map(q => ({
                 text: q.question,
                 correct: q.correct_answer,
-                options: [...q.incorrect_answers, q.correct_answer].sort(() => Math.random() - 0.5)
+                options: [...q.incorrect_answers, q.correct_answer]
+                    .sort(() => Math.random() - 0.5)
             }));
-            
-            this.showView('quiz-screen');
+
+            this.currentIdx = 0;
+            this.score = 0;
+
+            this.showView("quiz-screen");
             this.renderQuestion();
-        } catch (e) {
-            alert("API Error. Please try again later.");
+        } catch (error) {
+            console.error(error);
+            alert("Failed to load quiz questions.");
         }
     }
 
     startTimer() {
+        clearInterval(this.timer);
+
         this.timeLeft = 15;
         this.timerEl.innerText = this.timeLeft;
-        this.timerEl.classList.remove('warning');
-        clearInterval(this.timer);
+        this.timerEl.classList.remove("warning");
 
         this.timer = setInterval(() => {
             this.timeLeft--;
             this.timerEl.innerText = this.timeLeft;
 
-            if (this.timeLeft <= 5) this.timerEl.classList.add('warning');
+            if (this.timeLeft <= 5) {
+                this.timerEl.classList.add("warning");
+            }
 
             if (this.timeLeft <= 0) {
                 clearInterval(this.timer);
-                this.handleAnswer(null, null); // Auto-fail on timeout
+                this.handleAnswer(null, null);
             }
         }, 1000);
     }
 
     renderQuestion() {
-        const q = this.questions[this.currentIdx];
-        document.getElementById('question-text').innerHTML = q.text;
-        this.answerGrid.innerHTML = '';
-        
-        document.getElementById('progress-fill').style.width = `${(this.currentIdx / this.questions.length) * 100}%`;
+        const question = this.questions[this.currentIdx];
 
-        q.options.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.className = 'ans-btn';
-            btn.innerHTML = opt;
-            btn.onclick = () => this.handleAnswer(opt, btn);
-            this.answerGrid.appendChild(btn);
+        document.getElementById("question-text").innerHTML =
+            question.text;
+
+        this.answerGrid.innerHTML = "";
+
+        document.getElementById("progress-fill").style.width =
+            `${((this.currentIdx + 1) / this.questions.length) * 100}%`;
+
+        question.options.forEach(option => {
+            const button = document.createElement("button");
+
+            button.className = "ans-btn";
+            button.innerHTML = option;
+
+            button.addEventListener("click", () =>
+                this.handleAnswer(option, button)
+            );
+
+            this.answerGrid.appendChild(button);
         });
+
         this.startTimer();
     }
 
-    handleAnswer(selected, btn) {
+    handleAnswer(selected, button) {
         clearInterval(this.timer);
-        const correct = this.questions[this.currentIdx].correct;
-        const allBtns = this.answerGrid.querySelectorAll('button');
-        
-        allBtns.forEach(b => b.disabled = true);
 
-        if (selected === correct) {
-            btn.classList.add('correct');
+        const correctAnswer =
+            this.questions[this.currentIdx].correct;
+
+        const buttons =
+            this.answerGrid.querySelectorAll("button");
+
+        buttons.forEach(btn => (btn.disabled = true));
+
+        if (selected === correctAnswer) {
+            if (button) {
+                button.classList.add("correct");
+            }
             this.score++;
-        } else if (btn) {
-            btn.classList.add('wrong');
+        } else {
+            if (button) {
+                button.classList.add("wrong");
+            }
         }
 
-        // Always show the correct answer
-        allBtns.forEach(b => {
-            if (b.innerHTML === correct) b.classList.add('correct');
+        buttons.forEach(btn => {
+            if (btn.innerHTML === correctAnswer) {
+                btn.classList.add("correct");
+            }
         });
 
         setTimeout(() => {
             this.currentIdx++;
+
             if (this.currentIdx < this.questions.length) {
                 this.renderQuestion();
             } else {
@@ -108,150 +151,40 @@ class Quiz {
     }
 
     showResults() {
-        this.showView('results-screen');
-        document.getElementById('progress-fill').style.width = '100%';
-        document.getElementById('final-stat').innerText = `${this.userName}, your score: ${this.score} / ${this.questions.length}`;
+        this.showView("results-screen");
+
+        document.getElementById("final-stat").innerText =
+            `${this.userName}, your score: ${this.score} / ${this.questions.length}`;
+
         this.saveScore();
     }
 
     saveScore() {
-        let scores = JSON.parse(localStorage.getItem('quizScores') || "[]");
-        scores.push({ name: this.userName, score: this.score });
-        scores.sort((a, b) => b.score - a.score);
-        scores = scores.slice(0, 5); 
-        localStorage.setItem('quizScores', JSON.stringify(scores));
+        let scores =
+            JSON.parse(localStorage.getItem("quizScores")) || [];
 
-        document.getElementById('score-list').innerHTML = scores
-            .map(s => `<li><span>${s.name}</span><span>${s.score} pts</span></li>`)
-            .join('');
-    }
-}
-class Quiz {
-    constructor() {
-        this.score = 0;
-        this.currentIdx = 0;
-        this.questions = [];
-        this.userName = "";
-        this.timer = null;
-        this.timeLeft = 15;
-
-        // UI Bindings
-        this.views = document.querySelectorAll('.view');
-        this.startBtn = document.getElementById('start-btn');
-        this.answerGrid = document.getElementById('answer-grid');
-        this.timerEl = document.getElementById('seconds');
-        
-        this.startBtn.addEventListener('click', () => this.initGame());
-    }
-
-    showView(viewId) {
-        this.views.forEach(v => v.classList.add('hide'));
-        document.getElementById(viewId).classList.remove('hide');
-    }
-
-    async initGame() {
-        this.userName = document.getElementById('username').value || "Player";
-        const cat = document.getElementById('category-select').value;
-        document.getElementById('user-badge').innerText = `👤 ${this.userName}`;
-        
-        try {
-            const res = await fetch(`https://opentdb.com/api.php?amount=5&category=${cat}&type=multiple`);
-            const data = await res.json();
-            this.questions = data.results.map(q => ({
-                text: q.question,
-                correct: q.correct_answer,
-                options: [...q.incorrect_answers, q.correct_answer].sort(() => Math.random() - 0.5)
-            }));
-            
-            this.showView('quiz-screen');
-            this.renderQuestion();
-        } catch (e) {
-            alert("API Error. Please try again later.");
-        }
-    }
-
-    startTimer() {
-        this.timeLeft = 15;
-        this.timerEl.innerText = this.timeLeft;
-        this.timerEl.classList.remove('warning');
-        clearInterval(this.timer);
-
-        this.timer = setInterval(() => {
-            this.timeLeft--;
-            this.timerEl.innerText = this.timeLeft;
-
-            if (this.timeLeft <= 5) this.timerEl.classList.add('warning');
-
-            if (this.timeLeft <= 0) {
-                clearInterval(this.timer);
-                this.handleAnswer(null, null); // Auto-fail on timeout
-            }
-        }, 1000);
-    }
-
-    renderQuestion() {
-        const q = this.questions[this.currentIdx];
-        document.getElementById('question-text').innerHTML = q.text;
-        this.answerGrid.innerHTML = '';
-        
-        document.getElementById('progress-fill').style.width = `${(this.currentIdx / this.questions.length) * 100}%`;
-
-        q.options.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.className = 'ans-btn';
-            btn.innerHTML = opt;
-            btn.onclick = () => this.handleAnswer(opt, btn);
-            this.answerGrid.appendChild(btn);
-        });
-        this.startTimer();
-    }
-
-    handleAnswer(selected, btn) {
-        clearInterval(this.timer);
-        const correct = this.questions[this.currentIdx].correct;
-        const allBtns = this.answerGrid.querySelectorAll('button');
-        
-        allBtns.forEach(b => b.disabled = true);
-
-        if (selected === correct) {
-            btn.classList.add('correct');
-            this.score++;
-        } else if (btn) {
-            btn.classList.add('wrong');
-        }
-
-        // Always show the correct answer
-        allBtns.forEach(b => {
-            if (b.innerHTML === correct) b.classList.add('correct');
+        scores.push({
+            name: this.userName,
+            score: this.score
         });
 
-        setTimeout(() => {
-            this.currentIdx++;
-            if (this.currentIdx < this.questions.length) {
-                this.renderQuestion();
-            } else {
-                this.showResults();
-            }
-        }, 1200);
-    }
-
-    showResults() {
-        this.showView('results-screen');
-        document.getElementById('progress-fill').style.width = '100%';
-        document.getElementById('final-stat').innerText = `${this.userName}, your score: ${this.score} / ${this.questions.length}`;
-        this.saveScore();
-    }
-
-    saveScore() {
-        let scores = JSON.parse(localStorage.getItem('quizScores') || "[]");
-        scores.push({ name: this.userName, score: this.score });
         scores.sort((a, b) => b.score - a.score);
-        scores = scores.slice(0, 5); 
-        localStorage.setItem('quizScores', JSON.stringify(scores));
 
-        document.getElementById('score-list').innerHTML = scores
-            .map(s => `<li><span>${s.name}</span><span>${s.score} pts</span></li>`)
-            .join('');
+        scores = scores.slice(0, 5);
+
+        localStorage.setItem(
+            "quizScores",
+            JSON.stringify(scores)
+        );
+
+        document.getElementById("score-list").innerHTML =
+            scores
+                .map(
+                    score =>
+                        `<li><span>${score.name}</span><span>${score.score} pts</span></li>`
+                )
+                .join("");
     }
 }
+
 new Quiz();
